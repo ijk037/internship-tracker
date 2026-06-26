@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>IT - Job Clipper</title>
+  <style>
+    :root {
+      --bg: #070a13;
+      --card-bg: rgba(17, 24, 39, 0.8);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --purple: #8b5cf6;
+      --pink: #ec4899;
+      --cyan: #06b6d4;
+      --green: #10b981;
+      --red: #ef4444;
+    }
+
+    body {
+      width: 320px;
+      margin: 0;
+      padding: 16px;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      box-sizing: border-box;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      font-size: 13px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      background: linear-gradient(to right, var(--purple), var(--pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    input, select, textarea {
+      background-color: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--purple);
+    }
+
+    textarea {
+      resize: none;
+      height: 50px;
+    }
+
+    button {
+      background: linear-gradient(to right, var(--purple), var(--pink));
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      color: white;
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+    }
+
+    .alert {
+      font-size: 11px;
+      padding: 8px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+
+    .alert-error {
+      background-color: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    .alert-success {
+      background-color: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #a7f3d0;
+    }
+
+    .alert-info {
+      background-color: rgba(6, 180, 212, 0.1);
+      border: 1px solid rgba(6, 180, 212, 0.3);
+      color: #99f6e4;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .user-badge {
+      font-size: 10px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+
+    .logout-btn {
+      padding: 4px 8px;
+      font-size: 9px;
+    }
+
+    .spinner {
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">IT</div>
+      <h1>Job Clipper</h1>
+    </header>
+
+    <!-- ALERT MESSAGES -->
+    <div id="alert-box" class="alert hidden"></div>
+
+    <!-- VIEW 1: SIGN IN -->
+    <div id="login-view" class="card">
+      <form id="login-form">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" required placeholder="you@example.com">
+        </div>
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="••••••••">
+        </div>
+        <button type="submit" id="login-btn" style="width: 100%;">
+          <span>Sign In</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- VIEW 2: SAVE JOB -->
+    <div id="clipper-view" class="card hidden">
+      <div class="user-badge">
+        <span id="user-email">user@example.com</span>
+        <button id="logout-btn" class="btn-secondary logout-btn">Log Out</button>
+      </div>
+
+      <form id="clipper-form">
+        <div class="form-group">
+          <label for="job-title">Job Title</label>
+          <input type="text" id="job-title" required placeholder="e.g. Software Engineer">
+        </div>
+        <div class="form-group">
+          <label for="job-company">Company</label>
+          <input type="text" id="job-company" required placeholder="e.g. Google">
+        </div>
+        <div class="form-group">
+          <label for="job-location">Location</label>
+          <input type="text" id="job-location" placeholder="e.g. Remote">
+        </div>
+        <div class="form-group">
+          <label for="job-salary">Salary / Pay</label>
+          <input type="text" id="job-salary" placeholder="e.g. $40/hr">
+        </div>
+        <div class="form-group">
+          <label for="job-status">Status</label>
+          <select id="job-status">
+            <option value="Wishlist">Wishlist</option>
+            <option value="Applied">Applied</option>
+            <option value="Interviewing">Interviewing</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label for="job-notes">Notes</label>
+          <textarea id="job-notes" placeholder="Clip notes, job description details..."></textarea>
+        </div>
+
+        <button type="submit" id="save-btn" style="width: 100%;">
+          <span>Save to Tracker</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="supabase.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

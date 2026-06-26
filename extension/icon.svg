@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="purple-pink" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#ec4899" />
+    </linearGradient>
+  </defs>
+  <!-- Background Card -->
+  <rect x="8" y="8" width="112" height="112" rx="24" fill="#070a13" stroke="url(#purple-pink)" stroke-width="4" />
+  <!-- Floating Gradient Sphere -->
+  <circle cx="90" cy="38" r="18" fill="url(#purple-pink)" opacity="0.3" filter="blur(8px)" />
+  <!-- Initials "IT" -->
+  <text x="64" y="80" font-family="'Inter', system-ui, sans-serif" font-weight="900" font-size="52" fill="#ffffff" text-anchor="middle" letter-spacing="-1">IT</text>
+  <!-- Subtle details -->
+  <rect x="24" y="96" width="80" height="4" rx="2" fill="url(#purple-pink)" />
+</svg>

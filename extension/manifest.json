@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Internship Tracker Job Clipper",
+  "version": "1.0",
+  "description": "Clip job postings from LinkedIn and Indeed and save them directly to your Internship Tracker.",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://*.linkedin.com/*",
+    "https://*.indeed.com/*",
+    "https://uffxmfvvppeqgbpytfys.supabase.co/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.svg"
+  },
+  "icons": {
+    "128": "icon.svg"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.linkedin.com/*",
+        "https://*.indeed.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ]
+}

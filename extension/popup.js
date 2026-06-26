@@ -52,6 +52,7 @@ const userEmailText = document.getElementById('user-email');
 const logoutBtn = document.getElementById('logout-btn');
 const saveBtn = document.getElementById('save-btn');
 const loginBtn = document.getElementById('login-btn');
+const webLoginBtn = document.getElementById('web-login-btn');
 
 // Start extension popup
 document.addEventListener('DOMContentLoaded', async () => {
@@ -63,6 +64,9 @@ function setupEventListeners() {
   loginForm.addEventListener('submit', handleLogin);
   clipperForm.addEventListener('submit', handleSaveJob);
   logoutBtn.addEventListener('click', handleLogout);
+  webLoginBtn.addEventListener('click', () => {
+    chrome.tabs.create({ url: 'http://localhost:5173/login' });
+  });
 }
 
 // Show alert messages in popup

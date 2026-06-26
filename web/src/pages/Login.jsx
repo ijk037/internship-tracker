@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
@@ -8,6 +8,20 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
   const navigate = useNavigate()
+
+  useEffect(() => {
+    // Redirect if already logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) navigate('/dashboard')
+    })
+
+    // Listen to changes to handle OAuth redirect response
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) navigate('/dashboard')
+    })
+
+    return () => subscription.unsubscribe()
+  }, [navigate])
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -34,13 +48,16 @@ export default function Login() {
   const handleOAuthLogin = async (provider) => {
     setErrorMsg('')
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: window.location.origin + '/dashboard'
+          redirectTo: window.location.origin
         }
       })
       if (error) throw error
+      if (data?.url) {
+        window.location.assign(data.url)
+      }
     } catch (err) {
       setErrorMsg(err.message || `Failed to sign in with ${provider}.`)
     }

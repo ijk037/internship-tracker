@@ -1,7 +1,7 @@
 // Popup script for Internship Tracker Job Clipper
 
 const supabaseUrl = 'https://uffxmfvvppeqgbpytfys.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmZnhtZnZ2cHBlcWdicHl0ZnlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NzU3MTYsImV4cCI6MjA5ODA1MTcxNn0.-JyL0YlfwKYS9g0lKepc9LMlMzoMc-arIWYneeqLtlA';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmZnhtZnZ2cHBlcWdicHl0ZnlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NzU3MTYsImV4cCI6MjA5ODA1MTcxNn0.-JyL0YlfwKYS9g0lKepc9LMlMzoMc-arIWYneeqLtlA';
 
 // Custom storage adapter for Supabase to persist auth state in Chrome Extension storage
 const chromeStorageAdapter = {

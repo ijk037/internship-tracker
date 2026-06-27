@@ -26,11 +26,15 @@ export default function Dashboard() {
   const [openDate, setOpenDate] = useState('')
   const [deadline, setDeadline] = useState('')
   const [startDate, setStartDate] = useState('')
+  const [interviewDate, setInterviewDate] = useState('')
   
   // Database schema support flags
   const [hasFullSchema, setHasFullSchema] = useState(true)
   const [formError, setFormError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+
+  const [sortBy, setSortBy] = useState('deadline')
+  const [sortOrder, setSortOrder] = useState('asc')
 
   const navigate = useNavigate()
 
@@ -102,6 +106,7 @@ export default function Dashboard() {
     setOpenDate('')
     setDeadline('')
     setStartDate('')
+    setInterviewDate('')
     setFormError('')
     setShowModal(true)
   }
@@ -120,6 +125,7 @@ export default function Dashboard() {
     setOpenDate(app.open_date || '')
     setDeadline(app.deadline || '')
     setStartDate(app.start_date || '')
+    setInterviewDate(app.interview_date || '')
     setFormError('')
     setShowModal(true)
   }
@@ -152,6 +158,7 @@ export default function Dashboard() {
       if (openDate) payload.open_date = openDate
       if (deadline) payload.deadline = deadline
       if (startDate) payload.start_date = startDate
+      if (interviewDate) payload.interview_date = interviewDate
     }
 
     try {
@@ -210,6 +217,15 @@ export default function Dashboard() {
       fetchApplications(user.id)
     } catch (err) {
       console.error('Error moving status:', err)
+    }
+  }
+
+  const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(field)
+      setSortOrder('asc')
     }
   }
 
@@ -343,125 +359,277 @@ export default function Dashboard() {
             <p className="text-gray-400 text-sm">Loading applications...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 items-start">
-            {STAGES.map((stage) => {
-              const stageApps = applications.filter((app) => app.status === stage)
-              return (
-                <div key={stage} className="flex flex-col rounded-2xl bg-gray-900/40 p-4 border border-gray-800/60 min-h-[500px]">
-                  {/* Column Header */}
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-bold text-sm tracking-wide text-gray-200 uppercase">
-                      {stage}
-                    </h3>
-                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-800 text-gray-400 border border-gray-700/50">
-                      {stageApps.length}
-                    </span>
-                  </div>
+          (() => {
+            const sortedApplications = [...applications].sort((a, b) => {
+              let valA = a[sortBy]
+              let valB = b[sortBy]
+              
+              const aExists = valA !== undefined && valA !== null && valA !== '';
+              const bExists = valB !== undefined && valB !== null && valB !== '';
+              
+              if (!aExists && !bExists) return 0;
+              if (!aExists) return 1;
+              if (!bExists) return -1;
+              
+              let comparison = 0;
+              if (sortBy === 'deadline' || sortBy === 'open_date' || sortBy === 'interview_date' || sortBy === 'start_date') {
+                comparison = new Date(valA) - new Date(valB);
+              } else if (typeof valA === 'string') {
+                comparison = valA.localeCompare(valB);
+              } else {
+                comparison = valA > valB ? 1 : -1;
+              }
+              
+              return sortOrder === 'asc' ? comparison : -comparison;
+            });
 
-                  {/* Cards Area */}
-                  <div className="space-y-3 flex-1 overflow-y-auto">
-                    {stageApps.length === 0 ? (
-                      <div className="border border-dashed border-gray-800 rounded-xl py-8 text-center text-xs text-gray-600">
-                        No applications
-                      </div>
-                    ) : (
-                      stageApps.map((app) => (
-                        <div
-                          key={app.id}
-                          className="glass p-4 rounded-xl border border-gray-800/80 hover:border-brand-purple/40 hover:shadow-lg hover:shadow-brand-purple/5 transition duration-200 group relative"
-                        >
-                          <div className="flex justify-between items-start gap-2 mb-1">
-                            <h4 className="font-bold text-white text-sm group-hover:text-brand-purple transition truncate">
-                              {app.role}
-                            </h4>
-                            <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition shrink-0">
-                              <button
-                                onClick={() => openEditModal(app)}
-                                className="p-1 hover:bg-gray-800 rounded text-gray-400 hover:text-white transition cursor-pointer"
-                                title="Edit"
-                              >
-                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                </svg>
-                              </button>
-                              <button
-                                onClick={() => handleDelete(app.id)}
-                                className="p-1 hover:bg-red-950/30 rounded text-gray-500 hover:text-red-400 transition cursor-pointer"
-                                title="Delete"
-                              >
-                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              </button>
-                            </div>
-                          </div>
-                          
-                          <p className="text-xs font-semibold text-gray-300 mb-2 truncate">
-                            {app.company}
-                          </p>
-
-                          {/* Extra info details if present */}
-                          {(app.location || app.salary) && (
-                            <div className="flex flex-wrap gap-2 mb-3">
-                              {app.location && (
-                                <span className="text-[10px] px-2 py-0.5 rounded-md bg-gray-800/80 text-gray-400 border border-gray-700/30">
-                                  📍 {app.location}
-                                </span>
-                              )}
-                              {app.salary && (
-                                <span className="text-[10px] px-2 py-0.5 rounded-md bg-emerald-950/20 text-emerald-300 border border-emerald-500/20">
-                                  💰 {app.salary}
-                                </span>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Date Tracking Badges */}
-                          {(app.open_date || app.deadline || app.start_date) && (
-                            <div className="flex flex-col gap-1.5 mb-3 text-[10px] text-gray-400 border-t border-gray-800/40 pt-2 text-left">
-                              {app.open_date && (
-                                <div className="flex items-center gap-1">
-                                  <span>📅</span> <span className="text-gray-500">Open:</span> <span className="text-gray-300 font-medium">{app.open_date}</span>
-                                </div>
-                              )}
-                              {app.deadline && (
-                                <div className="flex items-center gap-1">
-                                  <span>⏰</span> <span className="text-gray-500">Deadline:</span> <span className={`font-semibold ${new Date(app.deadline) < new Date() ? 'text-red-400 animate-pulse' : 'text-brand-pink'}`}>{app.deadline}</span>
-                                </div>
-                              )}
-                              {app.start_date && (
-                                <div className="flex items-center gap-1">
-                                  <span>💼</span> <span className="text-gray-500">Starts:</span> <span className="text-gray-300 font-medium">{app.start_date}</span>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Quick move buttons */}
-                          <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-800/50">
-                            <span className="text-[10px] text-gray-500">
-                              Move to:
-                            </span>
-                            <div className="flex gap-1">
-                              {STAGES.filter((s) => s !== stage).map((s) => (
-                                <button
-                                  key={s}
-                                  onClick={() => moveStatus(app, s)}
-                                  className="text-[9px] px-1.5 py-0.5 rounded bg-gray-800 hover:bg-brand-purple/20 hover:text-brand-purple border border-gray-700/60 hover:border-brand-purple/30 text-gray-400 transition cursor-pointer"
-                                >
-                                  {s[0]}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
+            return (
+              <div className="space-y-4">
+                {/* Mobile Sorting Controls */}
+                <div className="lg:hidden flex items-center justify-between p-4 mb-2 glass rounded-xl border border-gray-800 text-xs">
+                  <span className="text-gray-400 font-semibold uppercase">Sort By:</span>
+                  <div className="flex gap-2">
+                    <select
+                      value={sortBy}
+                      onChange={(e) => handleSort(e.target.value)}
+                      className="bg-gray-950 border border-gray-800 px-2 py-1.5 rounded text-gray-300 outline-none text-xs"
+                    >
+                      <option value="deadline">Deadline</option>
+                      <option value="interview_date">Interview</option>
+                      <option value="open_date">Open Date</option>
+                      <option value="start_date">Start Date</option>
+                      <option value="company">Company</option>
+                      <option value="role">Role</option>
+                      <option value="status">Status</option>
+                    </select>
+                    <button
+                      onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                      className="bg-gray-800 border border-gray-700 px-2 py-1.5 rounded text-gray-300 hover:text-white cursor-pointer text-xs"
+                    >
+                      {sortOrder === 'asc' ? 'Asc ▲' : 'Desc ▼'}
+                    </button>
                   </div>
                 </div>
-              )
-            })}
-          </div>
+
+                {/* Desktop Header Row with Column Sorting Buttons */}
+                {sortedApplications.length > 0 && (
+                  <div className="hidden lg:flex items-center justify-between px-5 py-3 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    {/* Left Header: Title & Company Sorting */}
+                    <div className="flex-1 flex gap-4 items-center">
+                      <span>Application Details</span>
+                      <div className="flex gap-3 ml-6">
+                        <button
+                          onClick={() => handleSort('company')}
+                          className={`hover:text-white transition cursor-pointer flex items-center gap-1.5 ${sortBy === 'company' ? 'text-brand-purple font-bold' : ''}`}
+                        >
+                          Company {sortBy === 'company' ? (sortOrder === 'asc' ? '▲' : '▼') : '↕'}
+                        </button>
+                        <button
+                          onClick={() => handleSort('role')}
+                          className={`hover:text-white transition cursor-pointer flex items-center gap-1.5 ${sortBy === 'role' ? 'text-brand-purple font-bold' : ''}`}
+                        >
+                          Role {sortBy === 'role' ? (sortOrder === 'asc' ? '▲' : '▼') : '↕'}
+                        </button>
+                        <button
+                          onClick={() => handleSort('status')}
+                          className={`hover:text-white transition cursor-pointer flex items-center gap-1.5 ${sortBy === 'status' ? 'text-brand-purple font-bold' : ''}`}
+                        >
+                          Status {sortBy === 'status' ? (sortOrder === 'asc' ? '▲' : '▼') : '↕'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Middle Header: Aligned Grid of Date Columns */}
+                    <div className="flex-1 grid grid-cols-4 gap-4 border-l border-gray-800/60 pl-6 text-left">
+                      <button
+                        onClick={() => handleSort('open_date')}
+                        className={`hover:text-white text-left transition cursor-pointer flex items-center gap-1.5 ${sortBy === 'open_date' ? 'text-brand-purple font-bold' : ''}`}
+                      >
+                        Open {sortBy === 'open_date' ? (sortOrder === 'asc' ? '▲' : '▼') : '↕'}
+                      </button>
+                      <button
+                        onClick={() => handleSort('deadline')}
+                        className={`hover:text-white text-left transition cursor-pointer flex items-center gap-1.5 ${sortBy === 'deadline' ? 'text-brand-purple font-bold' : ''}`}
+                      >
+                        Deadline {sortBy === 'deadline' ? (sortOrder === 'asc' ? '▲' : '▼') : '↕'}
+                      </button>
+                      <button
+                        onClick={() => handleSort('interview_date')}
+                        className={`hover:text-white text-left transition cursor-pointer flex items-center gap-1.5 ${sortBy === 'interview_date' ? 'text-brand-purple font-bold' : ''}`}
+                      >
+                        Interview {sortBy === 'interview_date' ? (sortOrder === 'asc' ? '▲' : '▼') : '↕'}
+                      </button>
+                      <button
+                        onClick={() => handleSort('start_date')}
+                        className={`hover:text-white text-left transition cursor-pointer flex items-center gap-1.5 ${sortBy === 'start_date' ? 'text-brand-purple font-bold' : ''}`}
+                      >
+                        Starts {sortBy === 'start_date' ? (sortOrder === 'asc' ? '▲' : '▼') : '↕'}
+                      </button>
+                    </div>
+
+                    {/* Right Header: Actions */}
+                    <div className="w-auto lg:w-44 text-right pr-4">
+                      <span>Actions</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Horizontal Rows */}
+                {sortedApplications.length === 0 ? (
+                  <div className="glass p-12 text-center rounded-2xl border border-gray-800 text-gray-500">
+                    <svg className="w-12 h-12 mx-auto mb-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    <p className="text-sm">No applications found. Add one to get started!</p>
+                  </div>
+                ) : (
+                  sortedApplications.map((app) => (
+                    <div
+                      key={app.id}
+                      className="glass p-5 rounded-2xl border border-gray-800/80 hover:border-brand-purple/40 hover:shadow-lg hover:shadow-brand-purple/5 transition duration-200 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6"
+                    >
+                      {/* Left Column: Role & Company Info */}
+                      <div className="flex-1 min-w-0 text-left">
+                        <div className="flex flex-wrap items-center gap-3 mb-2">
+                          <h3 className="text-lg font-bold text-white truncate">
+                            {app.role}
+                          </h3>
+                          <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
+                            app.status === 'Offer' ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/30' :
+                            app.status === 'Interviewing' ? 'bg-brand-purple/20 text-brand-purple border border-brand-purple/30 animate-pulse' :
+                            app.status === 'Rejected' ? 'bg-red-950/40 text-red-400 border border-red-500/30' :
+                            app.status === 'Applied' ? 'bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/30' :
+                            'bg-gray-800 text-gray-400 border border-gray-700/50'
+                          }`}>
+                            {app.status}
+                          </span>
+                          {app.work_type && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-md bg-gray-800/60 text-gray-400 border border-gray-700/30 font-medium">
+                              {app.work_type}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm font-semibold text-gray-300 mb-3">
+                          {app.company}
+                        </p>
+                        
+                        {/* Location/Salary badges */}
+                        {(app.location || app.salary) && (
+                          <div className="flex flex-wrap gap-2">
+                            {app.location && (
+                              <span className="text-xs px-2.5 py-0.5 rounded-md bg-gray-800/80 text-gray-400 border border-gray-700/30">
+                                📍 {app.location}
+                              </span>
+                            )}
+                            {app.salary && (
+                              <span className="text-xs px-2.5 py-0.5 rounded-md bg-emerald-950/20 text-emerald-300 border border-emerald-500/20 font-medium">
+                                💰 {app.salary}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Middle Column: Dates Grid */}
+                      <div className="w-full lg:w-auto lg:flex-1 grid grid-cols-2 sm:grid-cols-4 gap-4 lg:border-l lg:border-gray-800/60 lg:pl-6 py-1 text-left">
+                        {/* Open Date */}
+                        <div>
+                          <span className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Open</span>
+                          <span className="text-xs font-semibold text-gray-300">
+                            {app.open_date ? `📅 ${app.open_date}` : '—'}
+                          </span>
+                        </div>
+                        
+                        {/* Deadline */}
+                        <div>
+                          <span className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Deadline</span>
+                          {app.deadline ? (
+                            <span className={`text-xs font-bold ${
+                              new Date(app.deadline) < new Date() ? 'text-red-400 animate-pulse' : 'text-brand-pink'
+                            }`}>
+                              ⏰ {app.deadline}
+                            </span>
+                          ) : (
+                            <span className="text-xs font-semibold text-gray-300">—</span>
+                          )}
+                        </div>
+
+                        {/* Interview Date */}
+                        <div>
+                          <span className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Interview</span>
+                          <span className="text-xs font-bold text-brand-purple">
+                            {app.interview_date ? `🗣️ ${app.interview_date}` : '—'}
+                          </span>
+                        </div>
+
+                        {/* Job Start Date */}
+                        <div>
+                          <span className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Starts</span>
+                          <span className="text-xs font-semibold text-gray-300">
+                            {app.start_date ? `💼 ${app.start_date}` : '—'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Right Column: Actions */}
+                      <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between lg:justify-center gap-4 w-full lg:w-auto border-t lg:border-t-0 border-gray-800/50 pt-4 lg:pt-0">
+                        {/* Quick Move Status dropdown selector */}
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-gray-500">Stage:</span>
+                          <select
+                            value={app.status}
+                            onChange={(e) => moveStatus(app, e.target.value)}
+                            className="text-xs px-2.5 py-1.5 rounded-lg bg-gray-950 border border-gray-800 hover:border-brand-purple/40 text-gray-300 transition outline-none"
+                          >
+                            {STAGES.map((s) => (
+                              <option key={s} value={s}>
+                                {s}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Edit/Delete Buttons */}
+                        <div className="flex items-center gap-2">
+                          {app.job_url && (
+                            <a
+                              href={app.job_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-2 bg-gray-800 hover:bg-brand-purple/20 hover:text-brand-purple border border-gray-700/60 rounded-xl text-gray-400 hover:text-white transition cursor-pointer"
+                              title="View Job Posting"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </a>
+                          )}
+                          <button
+                            onClick={() => openEditModal(app)}
+                            className="p-2 bg-gray-800 hover:bg-brand-purple/20 hover:text-brand-purple border border-gray-700/60 rounded-xl text-gray-400 hover:text-white transition cursor-pointer"
+                            title="Edit Details"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => handleDelete(app.id)}
+                            className="p-2 bg-gray-800 hover:bg-red-950/20 hover:text-red-400 border border-gray-700/60 rounded-xl text-gray-500 hover:text-red-400 transition cursor-pointer"
+                            title="Delete"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            );
+          })()
         )}
       </main>
 
@@ -595,7 +763,7 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
                         Opening Date
@@ -615,6 +783,17 @@ export default function Dashboard() {
                         type="date"
                         value={deadline}
                         onChange={(e) => setDeadline(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl bg-gray-900/50 border border-gray-700/60 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple outline-none transition text-white text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                        Interview Date
+                      </label>
+                      <input
+                        type="date"
+                        value={interviewDate}
+                        onChange={(e) => setInterviewDate(e.target.value)}
                         className="w-full px-4 py-2.5 rounded-xl bg-gray-900/50 border border-gray-700/60 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple outline-none transition text-white text-sm"
                       />
                     </div>

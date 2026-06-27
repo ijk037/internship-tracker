@@ -1,7 +1,28 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
 
 export default function Home() {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    // Redirect to dashboard if session exists
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        navigate('/dashboard')
+      }
+    })
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        navigate('/dashboard')
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [navigate])
+
   return (
     <div className="min-h-screen flex flex-col justify-between">
       {/* Header */}

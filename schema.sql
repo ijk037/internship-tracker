@@ -23,10 +23,15 @@ ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS contact_email TEXT;
 ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS contact_phone TEXT;
 ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS work_type TEXT CHECK (work_type IN ('Remote', 'Hybrid', 'Onsite'));
 
--- 3. Set up Row Level Security (RLS) if not already set
+-- 3. Add new date tracking columns
+ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS open_date DATE;
+ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS deadline DATE;
+ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS start_date DATE;
+
+-- 4. Set up Row Level Security (RLS) if not already set
 ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;
 
--- 4. Create policies (first drop existing to avoid conflicts)
+-- 5. Create policies (first drop existing to avoid conflicts)
 DROP POLICY IF EXISTS "Users can perform all actions on their own applications" ON public.applications;
 
 CREATE POLICY "Users can perform all actions on their own applications" 

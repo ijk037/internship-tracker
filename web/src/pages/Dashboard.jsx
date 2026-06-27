@@ -22,6 +22,11 @@ export default function Dashboard() {
   const [notes, setNotes] = useState('')
   const [contactPerson, setContactPerson] = useState('')
   
+  // Date tracking fields
+  const [openDate, setOpenDate] = useState('')
+  const [deadline, setDeadline] = useState('')
+  const [startDate, setStartDate] = useState('')
+  
   // Database schema support flags
   const [hasFullSchema, setHasFullSchema] = useState(true)
   const [formError, setFormError] = useState('')
@@ -94,6 +99,9 @@ export default function Dashboard() {
     setJobUrl('')
     setNotes('')
     setContactPerson('')
+    setOpenDate('')
+    setDeadline('')
+    setStartDate('')
     setFormError('')
     setShowModal(true)
   }
@@ -109,6 +117,9 @@ export default function Dashboard() {
     setJobUrl(app.job_url || '')
     setNotes(app.notes || '')
     setContactPerson(app.contact_person || '')
+    setOpenDate(app.open_date || '')
+    setDeadline(app.deadline || '')
+    setStartDate(app.start_date || '')
     setFormError('')
     setShowModal(true)
   }
@@ -138,6 +149,9 @@ export default function Dashboard() {
       if (jobUrl.trim()) payload.job_url = jobUrl.trim()
       if (notes.trim()) payload.notes = notes.trim()
       if (contactPerson.trim()) payload.contact_person = contactPerson.trim()
+      if (openDate) payload.open_date = openDate
+      if (deadline) payload.deadline = deadline
+      if (startDate) payload.start_date = startDate
     }
 
     try {
@@ -402,6 +416,27 @@ export default function Dashboard() {
                             </div>
                           )}
 
+                          {/* Date Tracking Badges */}
+                          {(app.open_date || app.deadline || app.start_date) && (
+                            <div className="flex flex-col gap-1.5 mb-3 text-[10px] text-gray-400 border-t border-gray-800/40 pt-2 text-left">
+                              {app.open_date && (
+                                <div className="flex items-center gap-1">
+                                  <span>📅</span> <span className="text-gray-500">Open:</span> <span className="text-gray-300 font-medium">{app.open_date}</span>
+                                </div>
+                              )}
+                              {app.deadline && (
+                                <div className="flex items-center gap-1">
+                                  <span>⏰</span> <span className="text-gray-500">Deadline:</span> <span className={`font-semibold ${new Date(app.deadline) < new Date() ? 'text-red-400 animate-pulse' : 'text-brand-pink'}`}>{app.deadline}</span>
+                                </div>
+                              )}
+                              {app.start_date && (
+                                <div className="flex items-center gap-1">
+                                  <span>💼</span> <span className="text-gray-500">Starts:</span> <span className="text-gray-300 font-medium">{app.start_date}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
                           {/* Quick move buttons */}
                           <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-800/50">
                             <span className="text-[10px] text-gray-500">
@@ -560,6 +595,42 @@ export default function Dashboard() {
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                        Opening Date
+                      </label>
+                      <input
+                        type="date"
+                        value={openDate}
+                        onChange={(e) => setOpenDate(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl bg-gray-900/50 border border-gray-700/60 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple outline-none transition text-white text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                        Deadline
+                      </label>
+                      <input
+                        type="date"
+                        value={deadline}
+                        onChange={(e) => setDeadline(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl bg-gray-900/50 border border-gray-700/60 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple outline-none transition text-white text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                        Job Start Date
+                      </label>
+                      <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl bg-gray-900/50 border border-gray-700/60 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple outline-none transition text-white text-sm"
+                      />
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
                       Job URL
@@ -588,7 +659,7 @@ export default function Dashboard() {
                 </>
               ) : (
                 <div className="p-4 rounded-xl bg-gray-800/30 border border-gray-800 text-xs text-gray-400">
-                  ⚠️ Extra fields (Notes, Salary, Location, URL) are disabled because the database schema hasn't been migrated yet. Read schema.sql for more information.
+                  ⚠️ Extra fields (Notes, Salary, Location, URL, and Dates) are disabled because the database schema hasn't been migrated yet. Read schema.sql for more information.
                 </div>
               )}
 
